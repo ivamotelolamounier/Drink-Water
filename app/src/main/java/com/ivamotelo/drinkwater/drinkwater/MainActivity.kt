@@ -1,10 +1,14 @@
 package com.ivamotelo.drinkwater.drinkwater
 
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import com.ivamotelo.drinkwater.R
+import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Bundle
 import android.preference.PreferenceManager
+import androidx.appcompat.app.AppCompatActivity
+import com.ivamotelo.drinkwater.R
+import com.ivamotelo.drinkwater.sync.DrinkWaterReminderIntentService
+import com.ivamotelo.drinkwater.sync.DrinkWaterReminderTask
+import com.ivamotelo.drinkwater.utils.PreferencesUtils
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -16,9 +20,11 @@ class MainActivity : AppCompatActivity(),
         setContentView(R.layout.activity_main)
 
         //TODO: 008 - Realize a chamada da função updateWaterCount
+        updateWaterCount()
 
         imageview_cup_icon.setOnClickListener {
             //TODO: 009 - Chame a função incrementWaterHandler
+            incrementWaterHandler()
         }
 
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
@@ -28,6 +34,10 @@ class MainActivity : AppCompatActivity(),
     /*TODO: 007 - crie uma função updateWaterCount
         - Atualize o textview_quantity com o valor da PreferencesUtils.getWaterCount
      */
+    fun updateWaterCount() {
+        val count = PreferencesUtils.getWaterCount(this)
+        textview_quantity.text = "$count"
+    }
 
     /*TODO: 008 - crie uma função chamada incrementWaterHandler
         - Crie uma intent explicita para acionar o DrinkWaterReminderIntentService
@@ -35,6 +45,11 @@ class MainActivity : AppCompatActivity(),
         - Chame startService e passe a intent como parametro
      */
 
+    fun incrementWaterHandler(){
+        val intent = Intent(this, DrinkWaterReminderIntentService::class.java)
+        intent.action = DrinkWaterReminderTask.ACTION_INCREMENT_WATER_COUNT
+        startService(intent)
+    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -44,5 +59,8 @@ class MainActivity : AppCompatActivity(),
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         //TODO: 010 - Chame o método updateWaterCount se o parametro key for igual a constante PrefencesUtils.KEY_WATER_COUNT
+        if (PreferencesUtils.KEY_WATER_COUNT == key) {
+            updateWaterCount()
+        }
     }
 }
